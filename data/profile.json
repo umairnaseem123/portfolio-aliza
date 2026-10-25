@@ -1,0 +1,23 @@
+{
+"name":"Alizah Fatima",
+"roles":["SEO Executive","Digital Marketer","Social Media Marketer","Graphic Designer"],
+"tagline":"I improve search visibility, run social media and paid ad campaigns, and keep office operations organised for growing businesses.",
+"about":["I’m a dedicated and creative professional with hands-on experience in social media marketing, paid ads and graphic design. I learn quickly, communicate clearly and stay organised across multiple projects.","I’m seeking opportunities to grow and add value to a professional team."],
+"contact":{"email":"aleezey92@gmail.com","phone":"+92 337 1362000","tel":"+923371362000","location":"Sector 5-F, New Karachi, Karachi"},
+"languages":[["English","Fluent"],["Urdu","Fluent"],["Gujarati","Mother tongue"],["Sindhi","Understand"]],
+"education":[["Matric","Completed"],["First year","In progress"]],
+"services":[
+{"t":"Search engine optimisation","d":"Improving rankings and organic traffic.","i":["On-page and off-page SEO","Keyword and competitor research","Backlink building","Performance monitoring"]},
+{"t":"Social media and paid ads","d":"Content and campaigns that reach the right audience.","i":["Facebook, Instagram, TikTok","Meta Ads planning and launch","Campaign optimisation"]},
+{"t":"Graphic design","d":"Clean visuals for posts, ads and presentations.","i":["Canva","Photoshop (basic)"]},
+{"t":"Office administration","d":"Accurate records, reports and daily support.","i":["MS Word, Excel, PowerPoint","Data entry and fast typing","Documentation and filing"]}],
+"experience":[
+{"when":"March 2026 – Present","co":"WebSensePro","role":"SEO Executive","pts":["Perform on-page and off-page SEO activities.","Conduct keyword research and competitor analysis.","Create and optimise website content for better search rankings.","Build high-quality backlinks and manage link-building campaigns.","Monitor website performance with SEO tools to improve visibility and organic traffic."]},
+{"when":"June 2026 – Present","co":"Adeeb Tech Lab","role":"Office Assistant / Office Executive","pts":["Manage daily office documentation and administrative tasks.","Prepare reports and maintain records using MS Word and Excel.","Perform data entry with a high level of accuracy.","Assist with office coordination and communication, and maintain files."]},
+{"when":"Self-employed","co":"Freelance","role":"Social Media Marketer and Graphic Designer","pts":["Managed social media marketing on Facebook, Instagram and TikTok.","Created professional graphics using Canva and basic Photoshop.","Planned, launched and optimised Meta Ads campaigns.","Managed multiple client projects and met deadlines."]}],
+"skills":[
+{"t":"Marketing","i":["SEO","Social media marketing","Meta Ads management"]},
+{"t":"Tools","i":["Canva","Photoshop (basic)","MS Office","HTML and C++ (basic)"]},
+{"t":"Professional","i":["Communication","Problem-solving","Time management","Online teaching and training","Amazon FBA virtual assistant (basic)"]}],
+"certificates":[{"t":"NYLP x AI Hackathon 2026: Building AI Products","by":"National Youth Leadership Programme (NYLP)","when":"15 to 18 October 2026","d":"Certificate of participation for active participation and for the creativity, innovation and commitment shown in turning ideas into AI-powered solutions.","no":"NYLP/Hackathon/B1/036","img":"/assets/certificate.jpg"}]
+}
