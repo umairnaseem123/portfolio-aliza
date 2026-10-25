@@ -1,102 +1,47 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ul = (a) => '<ul>' + a.map((x) => `<li>${esc(x)}</li>`).join('') + '</ul>';
-const pairs = (a) => '<ul>' + a.map(([k, v]) => `<li>${esc(k)} <span>${esc(v)}</span></li>`).join('') + '</ul>';
+const safe = (u) => (/^https?:\/\//i.test(u) ? esc(u) : '#');
+const ICONS = ['<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>', '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/>', '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', '<path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/><path d="m14 7 3 3"/>'];
 
-fetch('/api/profile').then((r) => r.json()).then(render).catch(() => { $('tagline').textContent = 'Could not load profile. Please refresh.'; });
+fetch('/api/profile').then((r) => r.json()).then(render).catch(() => { $('aboutText').textContent = 'Could not load profile. Please refresh.'; });
 
 function render(p) {
-  $('name').textContent = p.name;
-  $('tagline').textContent = p.tagline;
-  $('facts').innerHTML = `<dt>Current roles</dt><dd>SEO Executive, WebSensePro<br>Office Executive, Adeeb Tech Lab</dd><dt>Based in</dt><dd>Karachi, Pakistan</dd><dt>Languages</dt><dd>${p.languages.map((l) => esc(l[0])).join(', ')}</dd>`;
-  $('aboutText').innerHTML = p.about.map((t) => `<p>${esc(t)}</p>`).join('');
-  $('services').innerHTML = p.services.map((s) => `<div class="card rv"><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>${ul(s.i)}</div>`).join('');
-  $('jobs').innerHTML = p.experience.map((j) => `<div class="job rv"><div><div class="when">${esc(j.when)}</div><div class="co">${esc(j.co)}</div></div><div><h3>${esc(j.role)}</h3>${ul(j.pts)}</div></div>`).join('');
-  $('certs').innerHTML = p.certificates.map((c) => `<div class="cert rv"><img src="${esc(c.img)}" alt="Certificate: ${esc(c.t)}" loading="lazy"><div><h3>${esc(c.t)}</h3><p class="co">${esc(c.by)} · ${esc(c.when)}</p><p>${esc(c.d)}</p><p class="co">Certificate no. ${esc(c.no)}</p></div></div>`).join('');
-  $('skillGrid').innerHTML = p.skills.map((g) => `<div class="rv"><h3>${esc(g.t)}</h3>${ul(g.i)}</div>`).join('') + `<div class="rv"><h3>Languages</h3>${pairs(p.languages)}</div><div class="rv"><h3>Education</h3>${pairs(p.education)}</div>`;
-  const c = p.contact;
-  $('ways').innerHTML = `<div><small>Email</small><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div><div><small>Phone</small><a href="tel:${esc(c.tel)}">${esc(c.phone)}</a></div><div><small>WhatsApp</small><a href="https://wa.me/${esc(c.tel.replace('+', ''))}" rel="noopener">Send a message</a></div><div><small>Location</small>${esc(c.location)}</div>`;
-  typeRoles(p.roles);
-  reveal();
+  const c = p.contact, wa = 'https://wa.me/' + c.tel.replace('+', '');
+  window.__c = c;
+  $('aboutText').innerHTML = [...p.about].map((t) => `<p>${esc(t)}</p>`).join('') + `<p>${esc(p.tagline)}</p>`;
+  $('facts').innerHTML = `<dt>Based in</dt><dd>Karachi, Pakistan</dd><dt>Current roles</dt><dd>SEO Executive, WebSensePro<br>Office Executive, Adeeb Tech Lab</dd><dt>Languages</dt><dd>${p.languages.map((l) => `${esc(l[0])} (${esc(l[1])})`).join('<br>')}</dd><dt>Education</dt><dd>${p.education.map((e) => `${esc(e[0])}: ${esc(e[1])}`).join('<br>')}</dd>`;
+  $('socials').innerHTML = `<a href="mailto:${esc(c.email)}">Email</a><a href="${wa}" rel="noopener">WhatsApp</a>` + (p.socials || []).map((s) => `<a href="${safe(s.url)}" rel="noopener" target="_blank">${esc(s.label)}</a>`).join('');
+  $('jobs').innerHTML = p.experience.map((j) => `<article class="job rv"><span class="when">${esc(j.when)}</span><h3>${esc(j.role)}</h3><p class="co">${esc(j.co)}</p>${ul(j.pts)}</article>`).join('');
+  $('svc').innerHTML = p.services.map((s, i) => `<div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[i] || ICONS[0]}</svg></div><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p>${ul(s.i)}</div>`).join('');
+  const pr = p.projects || [];
+  $('proj').innerHTML = pr.length ? pr.map((x) => `<article class="proj rv">${x.image ? `<img src="${esc(x.image)}" alt="${esc(x.title)}" loading="lazy">` : ''}<div class="pb"><small>${esc(x.category || '')}</small><h3>${esc(x.title)}</h3><p>${esc(x.overview || '')}</p>${x.contribution ? `<p><b>My contribution:</b> ${esc(x.contribution)}</p>` : ''}${x.results ? `<p><b>Results:</b> ${esc(x.results)}</p>` : ''}${x.link ? `<a class="btn sec" href="${safe(x.link)}" target="_blank" rel="noopener">View project</a>` : ''}</div></article>`).join('')
+    : `<div class="empty rv"><h3>Case studies are being prepared</h3><p>I’m putting together real examples of my SEO, social media and ads work. Want to see relevant samples now? Just ask.</p><a class="btn pri" href="#contact">Request samples</a></div>`;
+  $('certs').innerHTML = p.certificates.map((x, i) => `<button class="cert rv" type="button" data-i="${i}"><img src="${esc(x.img)}" alt="Certificate: ${esc(x.t)}" loading="lazy"><div><h3>${esc(x.t)}</h3><p>${esc(x.by)} · ${esc(x.when)}</p><p>No. ${esc(x.no)}</p><p class="hint">Click to preview</p></div></button>`).join('');
+  $('skillGrid').innerHTML = p.skills.map((g) => `<div class="rv"><h3>${esc(g.t)}</h3><div class="tags">${g.i.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>`).join('');
+  $('ways').innerHTML = `<a href="mailto:${esc(c.email)}"><small>Email</small><b>${esc(c.email)}</b></a><a href="${wa}" rel="noopener"><small>WhatsApp</small><b>${esc(c.phone)}</b></a><div><small>Location</small><b>${esc(c.location)}</b></div>`;
+  $('certs').addEventListener('click', (e) => { const b = e.target.closest('.cert'); if (!b) return; const x = p.certificates[+b.dataset.i]; $('dimg').src = x.img; $('dimg').alt = 'Certificate: ' + x.t; $('dlg').showModal(); });
+  motion();
 }
 
-function typeRoles(roles) {
-  const el = $('typed');
-  if (reduce) { el.textContent = roles[0]; return; }
-  let r = 0, i = 0, del = false;
-  (function tick() {
-    const w = roles[r];
-    el.textContent = w.slice(0, i);
-    if (!del && i === w.length) { del = true; return setTimeout(tick, 1600); }
-    if (del && i === 0) { del = false; r = (r + 1) % roles.length; }
-    i += del ? -1 : 1;
-    setTimeout(tick, del ? 35 : 80);
-  })();
+function motion() {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const els = document.querySelectorAll('.rv');
+  if (reduce || !('IntersectionObserver' in window)) els.forEach((n) => n.classList.add('in'));
+  else { const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.1 }); els.forEach((n) => io.observe(n)); }
+  const links = [...document.querySelectorAll('#menu a')];
+  const so = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('main section[id]').forEach((s) => so.observe(s));
 }
 
-function reveal() {
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
-  document.querySelectorAll('.rv').forEach((n) => io.observe(n));
-}
+const menu = $('menu'), burger = $('burger');
+const setMenu = (o) => { menu.classList.toggle('open', o); burger.setAttribute('aria-expanded', o); burger.setAttribute('aria-label', o ? 'Close menu' : 'Open menu'); };
+burger.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
+menu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+$('dx').addEventListener('click', () => $('dlg').close());
+$('dlg').addEventListener('click', (e) => { if (e.target === $('dlg')) $('dlg').close(); });
 
-addEventListener('scroll', () => {
-  const h = document.documentElement;
-  $('progress').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100 + '%';
-}, { passive: true });
-
-// Hero: interactive network that reacts to the pointer
-(function network() {
-  const cv = $('net'), ctx = cv.getContext('2d'), hero = $('hero');
-  let w, h, pts = [], m = { x: -999, y: -999 };
-  const dpr = Math.min(devicePixelRatio || 1, 2);
-  function size() {
-    w = hero.clientWidth; h = hero.clientHeight;
-    cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const n = Math.round(Math.min(90, (w * h) / 14000));
-    pts = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35 }));
-  }
-  function frame() {
-    ctx.clearRect(0, 0, w, h);
-    for (const p of pts) {
-      if (!reduce) {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
-        const dx = m.x - p.x, dy = m.y - p.y, d = Math.hypot(dx, dy);
-        if (d < 140) { p.x -= dx * .01; p.y -= dy * .01; }
-      }
-      ctx.fillStyle = 'rgba(226,183,101,.8)';
-      ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, 7); ctx.fill();
-    }
-    for (let a = 0; a < pts.length; a++) for (let b = a + 1; b < pts.length; b++) {
-      const d = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
-      if (d < 120) { ctx.strokeStyle = `rgba(185,195,218,${(1 - d / 120) * .35})`; ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke(); }
-    }
-    if (!reduce) requestAnimationFrame(frame);
-  }
-  hero.addEventListener('pointermove', (e) => {
-    const r = hero.getBoundingClientRect(); m.x = e.clientX - r.left; m.y = e.clientY - r.top;
-    $('glow').style.setProperty('--x', m.x + 'px'); $('glow').style.setProperty('--y', m.y + 'px');
-  });
-  hero.addEventListener('pointerleave', () => { m.x = m.y = -999; });
-  addEventListener('resize', size);
-  size(); frame();
-})();
-
-// Photo card tilt (pointer devices only)
-(function tilt() {
-  const t = $('tilt');
-  if (reduce || !matchMedia('(hover:hover)').matches) return;
-  t.addEventListener('pointermove', (e) => {
-    const r = t.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-    t.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
-  });
-  t.addEventListener('pointerleave', () => { t.style.transform = ''; });
-})();
-
-// Contact form -> POST /api/contact
 $('form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const s = $('status'), btn = e.target.querySelector('button');
@@ -104,6 +49,11 @@ $('form').addEventListener('submit', async (e) => {
   try {
     const res = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
     const d = await res.json();
+    if (res.status === 503 && window.__c) {
+      const f = Object.fromEntries(new FormData(e.target));
+      location.href = `mailto:${window.__c.email}?subject=${encodeURIComponent('Portfolio message from ' + f.name)}&body=${encodeURIComponent(f.message + '\n\n' + f.name + ' (' + f.email + ')')}`;
+      s.className = 'ok'; s.textContent = 'Opening your email app to send the message…'; btn.disabled = false; return;
+    }
     if (!res.ok) throw new Error(d.error || 'Something went wrong.');
     s.className = 'ok'; s.textContent = 'Message sent. Thank you, I’ll reply soon.'; e.target.reset();
   } catch (err) { s.className = 'err'; s.textContent = err.message; }
